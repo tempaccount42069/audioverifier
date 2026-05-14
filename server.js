@@ -62,7 +62,11 @@ app.post("/grant-audio", async (req, res) => {
         }
       );
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log(`[DEBUG] Key "${entry.name}" status=${response.status} body=${text}`);
+      
+      let data;
+      try { data = JSON.parse(text); } catch { data = {}; }
 
       if (
         response.ok &&
@@ -75,27 +79,8 @@ app.post("/grant-audio", async (req, res) => {
         return res.json({ success: true, grantedBy: entry.name });
       }
 
-      // If error is "cannot manage asset" this key doesn't own it, try next
-      if (data.error && data.error.code === "CannotManageAsset") {
-        continue;
-      }
-
-      // If error is about subject, the universe config is wrong
-      if (data.error && data.error.code === "CannotManageSubject") {
-        console.error(
-          `[ERROR] Key "${entry.name}" cannot manage Universe ${UNIVERSE_ID}. Check universe ownership.`
-        );
-        continue;
-      }
-
-      // Log other errors
-      if (data.errors && data.errors.length > 0) {
-        console.warn(
-          `[WARN] Key "${entry.name}" partial error for ${numericId}:`,
-          data.errors
-        );
-        continue;
-      }
+      // Log the full error and continue to next key
+      console.warn(`[FAIL] Key "${entry.name}" for asset ${numericId}: ${text}`);
     } catch (err) {
       console.error(`[ERROR] Key "${entry.name}" fetch failed:`, err.message);
       continue;
