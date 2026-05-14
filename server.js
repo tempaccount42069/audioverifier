@@ -110,12 +110,14 @@ app.post("/grant-audio", async (req, res) => {
 });
 
 // Health check
+app.get("/", (req, res) => res.json({ status: "ok" }));
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 // ─── START ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Audio verify proxy running on port ${PORT}`);
+const HOST = "0.0.0.0";
+app.listen(PORT, HOST, () => {
+  console.log(`Audio verify proxy running on ${HOST}:${PORT}`);
   console.log(`Configured with ${API_KEYS.length} API key(s)`);
   console.log(`Target Universe: ${UNIVERSE_ID}`);
 });
