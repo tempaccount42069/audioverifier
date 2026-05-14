@@ -8,8 +8,9 @@ app.use(express.json());
 // Shared secret the game server must send to authenticate requests
 const SHARED_SECRET = process.env.PROXY_SECRET || "CHANGE_ME_TO_A_LONG_RANDOM_STRING";
 
-// Your game's Universe ID (find on Creator Dashboard → Experience → URL)
-const UNIVERSE_ID = process.env.UNIVERSE_ID || "YOUR_UNIVERSE_ID_HERE";
+// Subject to grant audio permissions to (Universe or Group)
+const SUBJECT_TYPE = process.env.SUBJECT_TYPE || "Universe";
+const SUBJECT_ID = process.env.SUBJECT_ID || process.env.UNIVERSE_ID || "YOUR_ID_HERE";
 
 // API keys for each account/group that owns audios.
 // Each entry: { name, apiKey }
@@ -34,8 +35,8 @@ app.post("/grant-audio", async (req, res) => {
   }
 
   const payload = {
-    subjectType: "Universe",
-    subjectId: UNIVERSE_ID,
+    subjectType: SUBJECT_TYPE,
+    subjectId: SUBJECT_ID,
     action: "Use",
     requests: [
       {
@@ -74,7 +75,7 @@ app.post("/grant-audio", async (req, res) => {
         data.successAssetIds.includes(numericId)
       ) {
         console.log(
-          `[GRANTED] Asset ${numericId} → Universe ${UNIVERSE_ID} via ${entry.name}`
+          `[GRANTED] Asset ${numericId} → ${SUBJECT_TYPE} ${SUBJECT_ID} via ${entry.name}`
         );
         return res.json({ success: true, grantedBy: entry.name });
       }
@@ -104,5 +105,5 @@ const HOST = "0.0.0.0";
 app.listen(PORT, HOST, () => {
   console.log(`Audio verify proxy running on ${HOST}:${PORT}`);
   console.log(`Configured with ${API_KEYS.length} API key(s)`);
-  console.log(`Target Universe: ${UNIVERSE_ID}`);
+  console.log(`Target: ${SUBJECT_TYPE} ${SUBJECT_ID}`);
 });
