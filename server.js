@@ -66,7 +66,7 @@ app.post("/grant-audio", async (req, res) => {
       console.log(`[DEBUG] Key "${entry.name}" status=${response.status} body=${text}`);
       
       let data;
-      try { data = JSON.parse(text); } catch { data = {}; }
+      try { data = JSON.parse(text); } catch (e) { data = {}; }
 
       if (
         response.ok &&
