@@ -12,12 +12,17 @@ const SHARED_SECRET = process.env.PROXY_SECRET || "CHANGE_ME_TO_A_LONG_RANDOM_ST
 const SUBJECT_TYPE = process.env.SUBJECT_TYPE || "Universe";
 const SUBJECT_ID = process.env.SUBJECT_ID || process.env.UNIVERSE_ID || "YOUR_ID_HERE";
 
-// API keys for each account/group that owns audios.
-// Each entry: { name, apiKey }
-// The API key must have "assets" permission with Write scope.
-const API_KEYS = JSON.parse(process.env.API_KEYS || "[]");
-// Example environment variable:
-// API_KEYS=[{"name":"GroupBot1","apiKey":"abc123"},{"name":"GroupBot2","apiKey":"def456"}]
+// API keys - supports a simple single key or JSON array of keys
+let API_KEYS = [];
+if (process.env.API_KEY) {
+  API_KEYS.push({ name: "Primary", apiKey: process.env.API_KEY });
+}
+try {
+  const parsed = JSON.parse(process.env.API_KEYS || "[]");
+  if (Array.isArray(parsed)) API_KEYS = API_KEYS.concat(parsed);
+} catch (e) {
+  console.warn("Could not parse API_KEYS JSON, using API_KEY only");
+}
 
 // ─── ENDPOINT ────────────────────────────────────────────────────────────────
 app.post("/grant-audio", async (req, res) => {
